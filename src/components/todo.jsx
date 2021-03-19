@@ -14,18 +14,40 @@ class Todo extends Component {
 
   handleSubmit = (event)=>{
     event.preventDefault();
-    
-
-    const mytodos = this.state.todos;
+    event.target.reset();
+    if(this.state.todo !== ''){
+      const mytodos = this.state.todos;
     mytodos.push(this.state.todo);
     this.setState({
-      todos: mytodos
-      
+      todos: mytodos,
+      todo:''
     })
-    
-    event.target.reset();
+    }
   }
 
+  handleCheckbox = (event)=>{
+    const task = event.target.value;
+    console.log('checkbox is clicked',task);
+    
+    const deltodos = this.state.todos;
+    const index = deltodos.indexOf(task);
+     
+    if(index > -1){
+      deltodos.splice(index,1);
+    }
+
+    this.setState({
+      todos:deltodos,
+      todo:''
+    })
+
+    event.target.checked = false;
+
+  }
+
+  handleDelete = (task)=>{
+    console.log(task);
+  }
   
 
   render() { 
@@ -40,7 +62,15 @@ class Todo extends Component {
       <div className="todoList">
         <ul>
           {this.state.todos.map( todo =>{
-              return (<div><p><Input type="checkbox" />{todo} </p>
+              return (<div><p>
+                <Input 
+                type="checkbox"
+                onClick={this.handleCheckbox.bind(this.value)}
+                value={todo}/>
+                
+                {todo} 
+                </p>
+                
               </div>);
           })}
         </ul>

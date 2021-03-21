@@ -13,7 +13,7 @@ import {
                         <CardTitle tag="h5">{ course.name }</CardTitle>
                         <CardSubtitle tag="h6" className="mb-2  font-weight-bold">{course.description}</CardSubtitle>
                         <CardText>{course.description }</CardText>
-                        <Button color="danger">Delete</Button><Button color="primary">Update</Button>
+                        <Button color="danger">Delete</Button>&nbsp;<Button color="primary">Update</Button>
                         </CardBody>
                     </Card>
                 </div>

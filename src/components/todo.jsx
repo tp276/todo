@@ -11,7 +11,7 @@ class Todo extends Component {
       todo:'',
       dates:[],
       date:'',
-      id:0
+      taskDateOver:[]
     }
   }
   
@@ -27,31 +27,71 @@ class Todo extends Component {
     
     if(this.state.todo !== '' && this.state.date !== ''){
       const mytodos = this.state.todos;
-    mytodos.push(this.state.todo);
+      mytodos.push(this.state.todo);
+      this.setState({
+        todos:mytodos,
+        todo:''
+      })
     
-    let inc_id = this.state.id;
-      inc_id = inc_id + 1;
-    this.setState({
-      todos: mytodos,
-      todo:'',
-      id: inc_id
-    })
+    
     }
 
     if(this.state.todo !== '' && this.state.date !== ''){
       const mydates = this.state.dates;
       mydates.push(this.state.date);
+      this.checkTaskDate(this.state.date);
       this.setState({
         dates: mydates,
         date:''
       })
+
+      
     }
+
+    
 
     if(this.state.todo == '' || this.state.date == ''){
       this.notifyIncomplete();
     }
 
     
+  }
+
+  checkTaskDate = (date)=>{
+    let today = new Date();
+      let curr_date = today.getDate();
+      let curr_month = today.getMonth() + 1;
+      let curr_year = today.getFullYear();
+      let curr_full_date = curr_year + '-' + curr_month + '-' + curr_date;
+      let p = curr_full_date.split('-');
+      let md = new Date(p[0], p[1] - 1, p[2]);
+      let todayDate = md.toDateString();
+      console.log('current date',todayDate);
+
+    
+        let parts = date.split('-');
+        let mydate = new Date(parts[0], parts[1] -1, parts[2]);
+        let taskDate = mydate.toDateString();
+        console.log('date fetched from array',taskDate);
+
+      
+        let b = taskDate < todayDate;
+       
+
+        const taskDateCheck = this.state.taskDateOver;
+        taskDateCheck.push(b);
+        this.setState({
+          taskDateOver: taskDateCheck
+        })
+      
+      
+
+      
+    
+      console.log(this.state.taskDateOver.length);
+      this.state.taskDateOver.map( res =>{
+      console.log(res);
+    });
   }
 
   notify = ()=>{
@@ -67,25 +107,33 @@ class Todo extends Component {
     const deltodos = this.state.todos;
     const index = deltodos.indexOf(task);
     const deldates = this.state.dates;
+    const deltaskCheckDate = this.state.taskDateOver;
      
     if(index > -1){
       deltodos.splice(index,1);
       deldates.splice(index,1);
+      deltaskCheckDate.splice(index,1);
     }
 
     this.setState({
       todos:deltodos,
       todo:'',
       dates:deldates,
-      date:''
+      date:'',
+      taskDateCheck:deltaskCheckDate
     })
 
     event.target.checked = false;
-
+    
   }
 
   handleDelete = (task)=>{
     console.log(task);
+  }
+
+  compareDate = ()=>{
+    const today = new Date();
+    console.log(today);
   }
   
 
@@ -102,7 +150,9 @@ class Todo extends Component {
         <input type = "date"
           onChange={(event)=>{this.setState({date: event.target.value})}}/>&nbsp;
         <input type="submit" value="Add" className="btn btn-primary"/>
-        <ToastContainer/>
+        <ToastContainer
+        position="bottom-right" 
+        autoClose={2000}/>
       </form>
       <div className="todoList">
         <ul>
@@ -115,10 +165,18 @@ class Todo extends Component {
                 type="checkbox"
                 onClick={this.handleCheckbox.bind(this.value)}
                 value={todo}/>
-                {todo}&nbsp;</p><p>
+                </p>
+                
+                <p>
+                {todo}&nbsp;</p>
+                <p>
                   finish by: &nbsp; 
                 {this.state.dates[index]}
                 </p>
+                <p>
+                  {(this.state.taskDateOver[index] == true) ? <h4 style={{color:'red'}}>Task date over</h4>: <h4>Task pending</h4>}
+                </p>
+                
               </div>);
           })}
           

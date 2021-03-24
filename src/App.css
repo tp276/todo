@@ -44,3 +44,7 @@
 .heading{
   padding: 20px;
 }
+
+body {
+  background-image: url('./assets/f.jpg');
+}

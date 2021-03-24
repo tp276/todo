@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Form, FormGroup, Label, Input, FormText } from 'reactstrap';
+import { Button, Form, FormGroup, Label, Input, FormText, Jumbotron,Row,Col,Container } from 'reactstrap';
 import { ToastContainer, toast } from 'react-toastify';
 
 class Todo extends Component {
@@ -11,7 +11,9 @@ class Todo extends Component {
       todo:'',
       dates:[],
       date:'',
-      taskDateOver:[]
+      taskDateOver:[],
+      srcs:[],
+      flag:0
     }
   }
   
@@ -39,7 +41,7 @@ class Todo extends Component {
     if(this.state.todo !== '' && this.state.date !== ''){
       const mydates = this.state.dates;
       mydates.push(this.state.date);
-      this.checkTaskDate(this.state.date);
+      
       this.setState({
         dates: mydates,
         date:''
@@ -48,17 +50,36 @@ class Todo extends Component {
       
     }
 
+    if(this.state.flag == 0){
+      const emp_srcs = this.state.srcs;
+      emp_srcs.push("");
+      this.setState({
+        srcs:emp_srcs
+        
+      })
+      
+    
+    }
+
+    this.setState({
+      flag:0
+    })
+    console.log('this is srcs array: ',this.state.srcs);
+
     
 
     if(this.state.todo == '' || this.state.date == ''){
       this.notifyIncomplete();
     }
-
     
+    this.sortDate();
+    this.checkTaskDate();
   }
 
-  checkTaskDate = (date)=>{
-    let today = new Date();
+  checkTaskDate = ()=>{
+
+      console.log('printing the dates array',this.state.dates);
+      let today = new Date();
       let curr_date = today.getDate();
       let curr_month = today.getMonth() + 1;
       let curr_year = today.getFullYear();
@@ -67,32 +88,39 @@ class Todo extends Component {
       let md = new Date(p[0], p[1] - 1, p[2]);
       let todayDate = md.toDateString();
       console.log('current date',todayDate);
+      let taskDateCheck= [];
 
-    
+      this.state.dates.map( date =>{
+
         let parts = date.split('-');
         let mydate = new Date(parts[0], parts[1] -1, parts[2]);
         let taskDate = mydate.toDateString();
         console.log('date fetched from array',taskDate);
-
-      
+          
         let b = taskDate < todayDate;
-       
+        console.log('printing the value of b',b);
+        taskDateCheck = this.state.taskDateOver;
 
-        const taskDateCheck = this.state.taskDateOver;
-        taskDateCheck.push(b);
-        this.setState({
-          taskDateOver: taskDateCheck
-        })
+        if(taskDate < todayDate){
+          taskDateCheck.push(true);
+        }
+        else{
+          taskDateCheck.push(false);
+        }
+      }) 
       
-      
+      this.setState({
+        taskDateOver: taskDateCheck
+      })
 
-      
-    
-      console.log(this.state.taskDateOver.length);
+      console.log(this.state.taskDateOver);
+      console.log('printing the length of the taskDateOver array',this.state.taskDateOver.length);
       this.state.taskDateOver.map( res =>{
-      console.log(res);
+      console.log("task date over array: ",res);
     });
   }
+
+ 
 
   notify = ()=>{
     toast.success("Task added");
@@ -108,11 +136,13 @@ class Todo extends Component {
     const index = deltodos.indexOf(task);
     const deldates = this.state.dates;
     const deltaskCheckDate = this.state.taskDateOver;
+    const delsrcs = this.state.srcs;
      
     if(index > -1){
       deltodos.splice(index,1);
       deldates.splice(index,1);
       deltaskCheckDate.splice(index,1);
+      delsrcs.splice(index,1);
     }
 
     this.setState({
@@ -120,7 +150,8 @@ class Todo extends Component {
       todo:'',
       dates:deldates,
       date:'',
-      taskDateCheck:deltaskCheckDate
+      taskDateCheck:deltaskCheckDate,
+      srcs:delsrcs
     })
 
     event.target.checked = false;
@@ -135,48 +166,115 @@ class Todo extends Component {
     const today = new Date();
     console.log(today);
   }
+
+  getImage = (event)=>{
+    
+
+    let file = event.target.files;
+    console.log('printing the value of file:',file);
+    if(file)
+    {
+      this.setState({
+        flag:1
+      });
+
+        let reader = new FileReader();
+        reader.readAsDataURL(file[0]);
+
+        reader.onload = (e) =>{
+        //console.log(e.target.result);
+
+        const mysrcs = this.state.srcs;
+        mysrcs.push(e.target.result);
+        
+    }
+    
+    }
+    }
+
+    sortDate = ()=>{
+      const sorted_dates = this.state.dates.sort();
+
+      this.setState({
+        dates: sorted_dates
+      })
+
+      
+    }
+    
+    
+  
+
+  
   
 
   render() { 
     return ( 
       <div>
         
-        <h1 className="heading">
-              To do list
-            </h1>
-      <form className="input" onSubmit={this.handleSubmit}>
+        <Jumbotron>
+        <h1 className="display-3 text-center">To Do App</h1>
+        <p className="lead text-center">This is a simple to app to keep your life easy...</p>      
+        </Jumbotron>
+        
+        
+      <form className="input" onSubmit={this.handleSubmit} className="text-center">
         <input type="text" onChange={(event) =>{ this.setState({ todo: event.target.value})}}/>&nbsp;&nbsp;
         <label>Finish date</label>&nbsp;
         <input type = "date"
-          onChange={(event)=>{this.setState({date: event.target.value})}}/>&nbsp;
-        <input type="submit" value="Add" className="btn btn-primary"/>
+          onChange={(event)=>{this.setState({date: event.target.value})}}/>&nbsp;&nbsp;
+        <input type="file" 
+        className="btn btn-lg btn-primary" 
+        id="file-selector"
+        accept=".jpg, .jpeg, .png"
+        onChange={(e) => this.getImage(e)}/> &nbsp;&nbsp;
+        <input type="submit" value="Add" className="btn btn-lg btn-primary"/>
+
         <ToastContainer
         position="bottom-right" 
         autoClose={2000}/>
       </form>
+      
+      <br/>
+      <br/>
       <div className="todoList">
         <ul>
           {this.state.todos.map( todo =>{
               let index = this.state.todos.indexOf(todo);
               
               return (<div>
-                <p>
+                
+                <Container>
+                <Row>
                 <Input 
                 type="checkbox"
                 onClick={this.handleCheckbox.bind(this.value)}
-                value={todo}/>
-                </p>
+                value={todo}/></Row> 
                 
-                <p>
-                {todo}&nbsp;</p>
-                <p>
+                
+                <Row>
+                <Col style={{fontWeight:'bold'}}>
+                
+                {todo}
+                </Col>
+                <Col>
                   finish by: &nbsp; 
-                {this.state.dates[index]}
-                </p>
-                <p>
-                  {(this.state.taskDateOver[index] == true) ? <h4 style={{color:'red'}}>Task date over</h4>: <h4>Task pending</h4>}
-                </p>
+                {this.state.dates[index]}&nbsp;</Col>
                 
+                <Col>
+                  {
+                  (this.state.taskDateOver[index] == true) ? 
+                  <p style={{color:'red'}}>Task date over</p>: <p>Task pending</p>
+                  }
+                </Col>
+                
+                <Col>
+                    <img src = {this.state.srcs[index]} height= "200" alt="You can display an image here!"/>
+                </Col>
+
+                
+                </Row>
+                </Container>
               </div>);
           })}
           
